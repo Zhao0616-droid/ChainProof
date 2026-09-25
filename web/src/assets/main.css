@@ -56,8 +56,71 @@ a {
 }
 
 .home .hint,
-.result .hint {
+.result .hint,
+.batch .hint {
   color: var(--cp-text-secondary);
+}
+
+.home-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.home-head h1,
+.batch h1 {
+  margin: 0 0 4px;
+}
+
+/* 批量审计 */
+.file-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.file-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.batch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.progress {
+  height: 8px;
+  background: #eef1f4;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--cp-accent);
+  transition: width 0.4s;
+}
+
+.count-chip.done {
+  background: #eef6f0;
+  color: var(--cp-ok);
+}
+
+.count-chip.failed {
+  background: #fdeceb;
+  color: var(--cp-danger);
 }
 
 /* 上传页 */

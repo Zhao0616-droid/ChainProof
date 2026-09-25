@@ -23,8 +23,13 @@
 uv run --project engine python -m engine.cli.analyze examples/contracts/VulnerableToken.sol -o result.json
 uv run --project engine python -m engine.cli.analyze --mock -o result.json
 
-# B AI(当前 Day 1 骨架)
+# B AI(LLM 规约生成;未配置密钥时自动降级输出空规约,不阻塞)
 uv run --project ai python -m ai.cli.specgen examples/contracts/VulnerableToken.sol -o specs.json
+# 可选:--offline 强制离线降级
+
+# LLM 配置(环境变量,支持 Anthropic Messages 与 OpenAI 兼容两种协议,密钥不入仓库)
+#   LLM_API_KEY / LLM_BASE_URL / LLM_MODEL(优先)
+#   兼容 OPENAI_API_KEY/OPENAI_BASE_URL、ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN/ANTHROPIC_BASE_URL/ANTHROPIC_MODEL
 
 # C 后端
 cd server && uv sync && uv run uvicorn app.main:app --port 8000
@@ -43,5 +48,7 @@ cd deploy/compose
 docker compose up -d --build
 # 访问 http://localhost:8080(nginx 代理 /api → api:8000,分析记录持久化在 ./data)
 ```
+
+可选:仓库根目录放 `.env`(已在 .gitignore,不入库)写 LLM 凭证,compose 会透传给 api 容器启用 LLM 规约生成;不配置则容器内自动走离线降级(仅模式检测 + Z3 溢出证明)。
 
 镜像说明(demo 单环境布局):`api` 镜像内含 engine/ai/server 三树代码与同一套 Python 依赖(引擎以 `sys.executable` 子进程运行,`ai` 当前纯 stdlib),独立部署后按树拆分。

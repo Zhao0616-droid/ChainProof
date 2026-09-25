@@ -6,6 +6,7 @@ import HomeView from '@/views/HomeView.vue'
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: HomeView },
   { path: '/result/:id', name: 'result', component: () => import('@/views/ResultView.vue') },
+  { path: '/batch', name: 'batch', component: () => import('@/views/BatchView.vue') },
 ]
 
 const router = createRouter({

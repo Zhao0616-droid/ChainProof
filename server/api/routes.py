@@ -1,21 +1,22 @@
-"""分析相关接口:上传校验(S6)、分析编排、结果存取与删除、示例合约。"""
+"""分析相关接口:上传校验(S6)、分析编排、结果存取与删除、批量任务、报告导出、示例合约。"""
 import hashlib
 import re
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 
 from services.pipeline import PipelineError, run_analysis
+from services.report import build_report
+from services.validation import validate_source
 from storage import store
+from taskqueue import tasks
 
 router = APIRouter(prefix="/api/v1")
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SAMPLE_PATH = REPO_ROOT / "examples" / "contracts" / "VulnerableToken.sol"
 
-MAX_SOURCE_CHARS = 100_000
-PRAGMA_RE = re.compile(r"pragma\s+solidity")
 ANALYSIS_ID_RE = re.compile(r"^[a-f0-9]{12}$")
 
 
@@ -24,15 +25,13 @@ class AnalyzeRequest(BaseModel):
     source: str
 
 
-def _validate_source(filename: str, source: str) -> None:
-    if not filename.lower().endswith(".sol"):
-        raise HTTPException(status_code=400, detail="仅支持 .sol 文件")
-    if len(source) > MAX_SOURCE_CHARS:
-        raise HTTPException(status_code=413, detail=f"文件过大(>{MAX_SOURCE_CHARS} 字符)")
-    if "\x00" in source:
-        raise HTTPException(status_code=400, detail="二进制文件不允许上传")
-    if "contract " not in source and not PRAGMA_RE.search(source):
-        raise HTTPException(status_code=400, detail="文件内容不像 Solidity 合约(缺少 contract 声明或 pragma)")
+class BatchFile(BaseModel):
+    filename: str
+    source: str
+
+
+class BatchRequest(BaseModel):
+    files: list[BatchFile]
 
 
 def _require_id(analysis_id: str) -> None:
@@ -46,7 +45,7 @@ def _detail(payload: dict) -> dict:
 
 @router.post("/analyze")
 def analyze(req: AnalyzeRequest):
-    _validate_source(req.filename, req.source)
+    validate_source(req.filename, req.source)
     try:
         result = run_analysis(req.source, req.filename)
     except PipelineError as e:
@@ -76,6 +75,41 @@ def delete_analysis(analysis_id: str):
     if not store.delete(analysis_id):
         raise HTTPException(status_code=404, detail="分析记录不存在")
     return {"deleted": analysis_id}
+
+
+@router.get("/analyses/{analysis_id}/report")
+def download_report(analysis_id: str):
+    _require_id(analysis_id)
+    payload = store.load(analysis_id)
+    if payload is None:
+        raise HTTPException(status_code=404, detail="分析记录不存在")
+    md = build_report(payload)
+    filename = f"{payload['name']}-审计报告.md"
+    from urllib.parse import quote
+
+    return Response(
+        content=md,
+        media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"},
+    )
+
+
+@router.post("/batch")
+def batch_analyze(req: BatchRequest):
+    if not req.files:
+        raise HTTPException(status_code=400, detail="文件列表为空")
+    if len(req.files) > tasks.MAX_FILES:
+        raise HTTPException(status_code=400, detail=f"单批最多 {tasks.MAX_FILES} 个文件")
+    task_id = tasks.create([f.model_dump() for f in req.files])
+    return {"task_id": task_id}
+
+
+@router.get("/tasks/{task_id}")
+def get_task(task_id: str):
+    task = tasks.get(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    return task
 
 
 @router.get("/sample")

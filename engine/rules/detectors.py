@@ -12,6 +12,8 @@ SWC = {
     "tx-origin": "SWC-115",
     "timestamp": "SWC-116",
     "unchecked-overflow": "SWC-101",
+    "spec-violation": "SPEC",
+    "spec-proved": "SPEC",
 }
 
 SEVERITY = {
@@ -20,6 +22,8 @@ SEVERITY = {
     "tx-origin": "medium",
     "timestamp": "low",
     "unchecked-overflow": "high",
+    "spec-violation": "high",
+    "spec-proved": "info",
 }
 
 SEVERITY_RANK = {"high": 0, "medium": 1, "low": 2, "info": 3}
@@ -94,12 +98,16 @@ class Finding:
     detail: str = ""
     counterexample: list | None = None
     proof_ref: str | None = None
+    formal: bool = False
 
     def to_schema(self, idx: int, filename: str) -> dict:
-        evidence: dict = {
-            "kind": "counterexample" if self.counterexample else "pattern",
-            "smt_status": "sat" if self.counterexample else "unknown",
-        }
+        if self.formal:
+            evidence: dict = {"kind": "formal", "smt_status": "unsat"}
+        else:
+            evidence = {
+                "kind": "counterexample" if self.counterexample else "pattern",
+                "smt_status": "sat" if self.counterexample else "unknown",
+            }
         if self.counterexample is not None:
             evidence["counterexample"] = self.counterexample
         if self.proof_ref:

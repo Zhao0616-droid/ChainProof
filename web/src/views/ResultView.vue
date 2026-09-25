@@ -7,6 +7,17 @@ import { useAppStore } from '@/stores/app'
 import type { AnalysisDetail, Finding } from '@/types'
 import { SEVERITY_LABEL, TYPE_LABEL } from '@/types'
 
+const EVIDENCE_LABEL: Record<string, string> = {
+  formal: '形式化证明',
+  counterexample: '反例',
+  pattern: '模式匹配',
+}
+const SMT_LABEL: Record<string, string> = {
+  sat: '可满足(存在违规输入)',
+  unsat: '不可满足(已证明)',
+  unknown: '未知',
+}
+
 const route = useRoute()
 const router = useRouter()
 const store = useAppStore()
@@ -79,6 +90,7 @@ function severityOrder(f: Finding) {
       </div>
       <div class="result-actions">
         <RouterLink to="/" class="btn ghost">返回</RouterLink>
+        <a class="btn ghost" :href="`/api/v1/analyses/${detail.id}/report`" download>导出报告</a>
         <button class="btn danger" :disabled="deleting" @click="removeCurrent">
           {{ deleting ? '删除中…' : '删除记录' }}
         </button>
@@ -156,8 +168,8 @@ function severityOrder(f: Finding) {
 
       <div v-if="expanded[f.id]" class="evidence">
         <div class="evidence-head">
-          <span>证据类型:{{ f.evidence.kind }}</span>
-          <span v-if="f.evidence.smt_status">SMT: {{ f.evidence.smt_status }}</span>
+          <span>证据类型:{{ EVIDENCE_LABEL[f.evidence.kind] ?? f.evidence.kind }}</span>
+          <span v-if="f.evidence.smt_status">SMT: {{ SMT_LABEL[f.evidence.smt_status] ?? f.evidence.smt_status }}</span>
           <span v-if="f.evidence.proof_ref">{{ f.evidence.proof_ref }}</span>
         </div>
 

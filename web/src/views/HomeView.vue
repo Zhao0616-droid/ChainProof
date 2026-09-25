@@ -89,8 +89,13 @@ onMounted(loadRecent)
 
 <template>
   <section class="home">
-    <h1>合约安全分析</h1>
-    <p class="hint">上传或粘贴 Solidity 源码,引擎 + 形式化验证生成审计结果(演示版)</p>
+    <div class="home-head">
+      <div>
+        <h1>合约安全分析</h1>
+        <p class="hint">上传或粘贴 Solidity 源码,引擎 + 形式化验证生成审计结果(演示版)</p>
+      </div>
+      <RouterLink to="/batch" class="btn ghost">批量审计</RouterLink>
+    </div>
 
     <div class="upload-card">
       <div class="upload-row">

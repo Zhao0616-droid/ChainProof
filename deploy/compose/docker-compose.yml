@@ -7,6 +7,9 @@ services:
       dockerfile: deploy/docker/server.Dockerfile
     volumes:
       - ./data:/app/data
+    env_file:
+      - path: ../../.env
+        required: false
     restart: unless-stopped
 
   web:

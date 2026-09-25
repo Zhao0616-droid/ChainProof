@@ -78,4 +78,6 @@ export const TYPE_LABEL: Record<string, string> = {
   'tx-origin': 'tx.origin 鉴权',
   timestamp: '时间戳依赖',
   'unchecked-overflow': 'unchecked 溢出',
+  'spec-violation': '规约违规',
+  'spec-proved': '规约已证明',
 }

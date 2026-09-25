@@ -13,15 +13,21 @@
 | auth/ | 用户与权限 | W2 |
 | obs/ | 日志/指标/健康检查 | C12 |
 
-## 运行(当前为 Day 1 骨架)
+## 运行
 
 ```bash
 cd server
 uv sync
 uv run uvicorn app.main:app --port 8000
-# 接口:/healthz、POST /api/v1/analyze、GET /api/v1/analyses[/{id}]、
-#       DELETE /api/v1/analyses/{id}、GET /api/v1/sample
+# 接口:/healthz、POST /api/v1/analyze(一次请求返完整详情)、
+#       GET /api/v1/analyses[/{id}]、DELETE /api/v1/analyses/{id}、
+#       GET /api/v1/analyses/{id}/report(Markdown 审计报告下载)、
+#       POST /api/v1/batch + GET /api/v1/tasks/{task_id}(批量,内存队列)、
+#       GET /api/v1/sample(示例合约)
 ```
+
+分析链路:specgen(B,LLM 规约,超时 150s)→ engine analyze(A,检测+规约证明)→ enrich(B,解释/补丁)。
+LLM 凭证读环境变量(LLM_API_KEY/LLM_BASE_URL/LLM_MODEL,兼容 OPENAI_*/ANTHROPIC_*),未配置时 specgen 离线降级为空规约,不阻塞分析。
 
 ## 纪律
 
