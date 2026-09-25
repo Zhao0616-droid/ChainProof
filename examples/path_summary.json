@@ -1,0 +1,18 @@
+{
+  "contract": { "name": "Token", "file": "Token.sol", "solc": "0.8.20" },
+  "functions": [{
+    "name": "withdraw",
+    "visibility": "public",
+    "state_vars_written": ["balances", "totalSupply"],
+    "external_calls": ["msg.sender.call{value: amt}(\"\")"],
+    "paths_explored": 12,
+    "suspicious_score": 0.82,
+    "notes": "外部调用后仍写状态变量"
+  }],
+  "state_vars": [
+    { "name": "balances", "type": "mapping(address=>uint256)", "invariants_hint": "总量守恒" }
+  ],
+  "solver_feedback": [
+    { "property": "balances[msg.sender] >= 0", "status": "unsat", "counterexample_brief": null }
+  ]
+}

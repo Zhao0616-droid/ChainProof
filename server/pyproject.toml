@@ -1,0 +1,10 @@
+[project]
+name = "chainproof-server"
+version = "0.1.0"
+description = "ChainProof 产品层后端(C):API/任务队列/存储/鉴权"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+]
+# 后续依赖逐项加(uv add):sqlalchemy/数据库驱动, 队列(如 arq), 限流, auth 等

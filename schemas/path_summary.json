@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chainproof.dev/schemas/path_summary.json",
+  "title": "PathSummary — A(engine) 产 → B(ai) 用",
+  "description": "唯一契约 ①。冻结于 Day 1,任何字段名/类型的改动必须三方共同确认。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "functions", "state_vars", "solver_feedback"],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "file", "solc"],
+      "properties": {
+        "name": { "type": "string" },
+        "file": { "type": "string" },
+        "solc": { "type": "string" }
+      }
+    },
+    "functions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "visibility",
+          "state_vars_written",
+          "external_calls",
+          "paths_explored",
+          "suspicious_score"
+        ],
+        "properties": {
+          "name": { "type": "string" },
+          "visibility": { "type": "string" },
+          "state_vars_written": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "external_calls": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "paths_explored": { "type": "integer", "minimum": 0 },
+          "suspicious_score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "state_vars": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "invariants_hint": { "type": "string" }
+        }
+      }
+    },
+    "solver_feedback": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["property", "status"],
+        "properties": {
+          "property": { "type": "string" },
+          "status": { "enum": ["sat", "unsat", "unknown", "timeout"] },
+          "counterexample_brief": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

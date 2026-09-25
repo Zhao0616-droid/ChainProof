@@ -1,0 +1,28 @@
+{
+  "contract": { "name": "Token", "hash": "sha256:...", "compiler": "0.8.20" },
+  "analysis": {
+    "status": "done",
+    "coverage": { "proved": 6, "total": 10 },
+    "duration_ms": 4210,
+    "model_version": "specgen-v1.2"
+  },
+  "findings": [{
+    "id": "F1",
+    "swc": "SWC-107",
+    "type": "reentrancy",
+    "severity": "high",
+    "location": { "file": "Token.sol", "line": 42, "function": "withdraw" },
+    "evidence": {
+      "kind": "counterexample",
+      "smt_status": "sat",
+      "counterexample": [
+        { "step": 1, "state": { "balances[attacker]": 100 } },
+        { "step": 2, "state": { "reentrant_call": true } }
+      ],
+      "proof_ref": "proof/F1.smt2"
+    },
+    "explanation": "withdraw 在转账后才扣减余额,攻击者可在回调中再次调用,重复提现。",
+    "patch": { "diff": "--- a/Token.sol\n+++ b/Token.sol\n@@ ...", "verified": true }
+  }],
+  "unverified": [{ "reason": "timeout", "scope": "function complexLoop" }]
+}

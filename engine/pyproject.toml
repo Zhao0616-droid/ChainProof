@@ -1,0 +1,7 @@
+[project]
+name = "chainproof-engine"
+version = "0.1.0"
+description = "ChainProof 引擎层(A):编译/沙箱/符号执行/求解器/反例解析"
+requires-python = ">=3.11"
+dependencies = []
+# 后续依赖逐项加(uv add):py-solc-x, mythril, slither-analyzer, z3-solver, cvc5

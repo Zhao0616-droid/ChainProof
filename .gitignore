@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+*.local
+
+# 环境与密钥(S8)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# 数据集只放拉取脚本,绝不入库(S11)
+data/
+datasets/
+
+# 日志与运行时产物
+logs/
+*.log
+result.json
+specs.json
+
+# IDE / 本地工具配置
+.idea/
+.vscode/
+.DS_Store
+.claude/settings.local.json

@@ -1,0 +1,7 @@
+[project]
+name = "chainproof-ai"
+version = "0.1.0"
+description = "ChainProof AI 层(B):规约生成/路径排序/解释/补丁/评测"
+requires-python = ">=3.11"
+dependencies = []
+# 后续依赖逐项加(uv add):openai(或所选 LLM SDK), httpx, peft, trl(条件)
