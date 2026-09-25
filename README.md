@@ -35,10 +35,3 @@ cd web && npm install && npm run dev
 # 契约自检(三方共用,M8)
 uv run schemas/validate.py examples/path_summary.json examples/analysis_result.json result.json
 ```
-
-## 纪律(来自《链证-分工与集成手册》第 6 章)
-
-- ❌ 改 `schemas/` 字段名/类型;❌ 在别人目录加文件;❌ 复制别人代码改;❌ 口头约定接口
-- 提交信息格式:`[A|B|C] 模块: 做了什么`;每次提交必须通过自己的测试
-- 主干保护 + 每人一条 feature 分支;每日 18:00 前推送到自己的分支
-- 数据集只给运行时拉取脚本,绝不入库(S11);密钥不进仓库(S8)
