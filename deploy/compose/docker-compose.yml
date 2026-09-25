@@ -1,3 +1,5 @@
+name: chainproof
+
 services:
   api:
     build:

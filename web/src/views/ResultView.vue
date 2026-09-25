@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
+import { api } from '@/api'
 import { useAppStore } from '@/stores/app'
 import type { AnalysisDetail, Finding } from '@/types'
 import { SEVERITY_LABEL, TYPE_LABEL } from '@/types'
 
 const route = useRoute()
+const router = useRouter()
 const store = useAppStore()
 
 const detail = ref<AnalysisDetail | null>(store.current)
 const error = ref('')
+const deleting = ref(false)
 const expanded = ref<Record<string, boolean>>({})
 const sourceLines = ref<HTMLElement | null>(null)
 
@@ -23,14 +26,26 @@ const findingLines = computed(() => {
 onMounted(async () => {
   if (detail.value && detail.value.id === route.params.id) return
   try {
-    const res = await fetch(`/api/v1/analyses/${route.params.id}`)
-    if (!res.ok) throw new Error(`记录不存在(${res.status})`)
-    detail.value = await res.json()
+    detail.value = await api<AnalysisDetail>(`/api/v1/analyses/${route.params.id}`)
     store.setCurrent(detail.value)
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
   }
 })
+
+async function removeCurrent() {
+  if (!detail.value) return
+  if (!window.confirm(`删除分析记录 ${detail.value.name}(${detail.value.id})?`)) return
+  deleting.value = true
+  try {
+    await api(`/api/v1/analyses/${detail.value.id}`, { method: 'DELETE' })
+    store.setCurrent(null)
+    router.push('/')
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e)
+    deleting.value = false
+  }
+}
 
 function toggle(id: string) {
   expanded.value[id] = !expanded.value[id]
@@ -62,7 +77,12 @@ function severityOrder(f: Finding) {
           {{ detail.result.contract.compiler }} · hash {{ shortHash(detail.result.contract.hash) }}
         </p>
       </div>
-      <RouterLink to="/" class="btn ghost">返回</RouterLink>
+      <div class="result-actions">
+        <RouterLink to="/" class="btn ghost">返回</RouterLink>
+        <button class="btn danger" :disabled="deleting" @click="removeCurrent">
+          {{ deleting ? '删除中…' : '删除记录' }}
+        </button>
+      </div>
     </div>
 
     <div class="summary">

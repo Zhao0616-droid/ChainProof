@@ -1,6 +1,6 @@
 # web/ — 产品层前端(人 C)
 
-> 一句话:喂 mock JSON 全流程可点,换真引擎后一行不改。
+> 一句话:上传 → 分析 → 结果页(证据/补丁/源码定位)真实全流程,契约以 schemas/ 为准、前端只读渲染。
 
 ## 技术栈
 
@@ -10,10 +10,14 @@ Vue 3 + Vite 7 + TypeScript + Vue Router + Pinia(设计系统 tokens 见 src/ass
 
 | 目录 | 内容 |
 |---|---|
-| src/core 将来放 | 路由/状态/组件库/设计系统(路由与状态已在 router/ stores/ 落地) |
-| src/modules/m1-m6 | 六个功能模块,当前为占位页 |
-| src/components/ | 通用组件 |
-| src/assets/ | 设计 tokens 与静态资源 |
+| src/api.ts | fetch 封装(JSON 解析 + 错误提取 detail) |
+| src/types.ts | 与 schemas/analysis_result.json 对应的接口类型 |
+| src/stores/ | Pinia 状态(当前分析记录) |
+| src/views/ | HomeView(上传/最近列表)、ResultView(结果页) |
+| src/router/ | 路由:/ 与 /result/:id |
+| src/assets/ | 设计 tokens 与样式 |
+
+M1-M6 其余模块(项目空间/规约库/报告导出/批量审计/知识库)后续按排期实现。
 
 ## 运行
 

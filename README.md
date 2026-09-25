@@ -9,7 +9,7 @@
 |---|---|---|---|
 | [engine/](engine/) | A | 编译/沙箱/符号执行/求解器/反例解析 | `analyze x.sol → result.json` |
 | [ai/](ai/) | B | 规约生成 + 求解器反馈闭环/解释/补丁/评测 | `specgen x.sol → specs.json` |
-| [server/](server/) [web/](web/) [deploy/](deploy/) | C | API/队列/存储 ／ M1-M6 前端 ／ 部署 | Web 喂 mock JSON 全流程可点 |
+| [server/](server/) [web/](web/) [deploy/](deploy/) | C | API/队列/存储 ／ M1-M6 前端 ／ 部署 | 上传→分析→结果页真实全流程可点 |
 | [schemas/](schemas/) | 共享 | **两个 JSON 契约(冻结,禁止单方改动)** | 契约校验器 |
 | [examples/](examples/) | 共享 | 三份样例 + 统一测试合约 VulnerableToken.sol | — |
 | [docs/](docs/) | 共享 | 方案/分工/品质清单(另含 api/ops/user-guide 交付文档位) | — |

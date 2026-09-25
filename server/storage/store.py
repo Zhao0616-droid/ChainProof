@@ -21,7 +21,7 @@ def save(analysis_id: str, name: str, source: str, result: dict) -> dict:
     (DATA_DIR / f"{analysis_id}.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    return meta(payload)
+    return payload
 
 
 def load(analysis_id: str) -> dict | None:
@@ -29,6 +29,14 @@ def load(analysis_id: str) -> dict | None:
     if not path.is_file():
         return None
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def delete(analysis_id: str) -> bool:
+    path = DATA_DIR / f"{analysis_id}.json"
+    if not path.is_file():
+        return False
+    path.unlink()
+    return True
 
 
 def list_all() -> list[dict]:

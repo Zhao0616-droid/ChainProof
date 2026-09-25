@@ -19,8 +19,8 @@
 cd server
 uv sync
 uv run uvicorn app.main:app --port 8000
-# 然后:curl http://127.0.0.1:8000/healthz
-#      curl http://127.0.0.1:8000/api/v1/mock/analysis_result
+# 接口:/healthz、POST /api/v1/analyze、GET /api/v1/analyses[/{id}]、
+#       DELETE /api/v1/analyses/{id}、GET /api/v1/sample
 ```
 
 ## 纪律
