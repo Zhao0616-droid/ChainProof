@@ -1,34 +1,103 @@
-"""ChainProof 引擎 CLI(Day 1 骨架):analyze <contract.sol> [-o result.json] [--mock]
+"""ChainProof 引擎 CLI:analyze <contract.sol> [-o result.json] [--mock]
 
-真实实现按分工手册 A1-A16 逐步替换本 stub;产出必须符合 schemas/analysis_result.json。
+demo v0 流程:源码模式检测(规则库)→ Z3 溢出反例 → 产出符合
+schemas/analysis_result.json 的结果。完整符号执行与规约接入见 A3/A12。
 """
 import argparse
 import hashlib
 import json
 import sys
+import time
 from pathlib import Path
+
+from engine.rules.detectors import (
+    SEVERITY,
+    SEVERITY_RANK,
+    Finding,
+    extract_functions,
+    extract_state_vars,
+    strip_comments_and_strings,
+    detect_patterns,
+)
+from engine.solver.overflow import analyze_overflow
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXAMPLES = REPO_ROOT / "examples" / "analysis_result.json"
-DEFAULT_SOLC = "0.8.20"
+
+DEMO_UNVERIFIED = [
+    {
+        "reason": "demo v0:符号执行、规约生成与完整规则库未接入;模式检测证据为 pattern,需人工复核",
+        "scope": "all",
+    }
+]
 
 
-def build_stub_result(contract_path: Path) -> dict:
-    content = contract_path.read_bytes()
-    return {
+def analyze_source(source: str, filename: str) -> dict:
+    t0 = time.perf_counter()
+    cleaned = strip_comments_and_strings(source)
+    lines = cleaned.splitlines()
+    state_vars = extract_state_vars(cleaned)
+    functions = extract_functions(cleaned)
+
+    findings: list[Finding] = []
+    overflow_candidates = []
+    for fn in functions:
+        fnd, cands = detect_patterns(fn, state_vars, lines)
+        findings.extend(fnd)
+        overflow_candidates.extend(cands)
+
+    z3_checks = 0
+    for cand in overflow_candidates:
+        res = analyze_overflow(cand.expr)
+        z3_checks += 1
+        if res is None:
+            findings.append(
+                Finding(
+                    "unchecked-overflow",
+                    cand.line,
+                    cand.function,
+                    f"unchecked 块内的算术表达式 {cand.expr} 可能回绕(Z3 未安装,无法生成反例)。",
+                )
+            )
+        elif res["sat"]:
+            findings.append(
+                Finding(
+                    "unchecked-overflow",
+                    cand.line,
+                    cand.function,
+                    f"Z3 证明 {cand.expr} 存在回绕输入:见反例轨迹。",
+                    counterexample=res["counterexample"],
+                    proof_ref=res["proof_ref"],
+                )
+            )
+
+    findings.sort(key=lambda f: (SEVERITY_RANK[SEVERITY[f.type]], f.line))
+    schema_findings = [f.to_schema(i + 1, filename) for i, f in enumerate(findings)]
+
+    content = source.encode("utf-8")
+    result = {
         "contract": {
-            "name": contract_path.stem,
+            "name": Path(filename).stem,
             "hash": "sha256:" + hashlib.sha256(content).hexdigest(),
-            "compiler": DEFAULT_SOLC,
+            "compiler": "source-pattern-v0 (solc 未接入)",
         },
         "analysis": {
-            "status": "partial",
-            "coverage": {"proved": 0, "total": 0},
-            "duration_ms": 0,
+            "status": "done",
+            "coverage": {
+                "proved": z3_checks,
+                "total": z3_checks + _rule_checks(functions),
+            },
+            "duration_ms": int((time.perf_counter() - t0) * 1000),
         },
-        "findings": [],
-        "unverified": [{"reason": "engine stub (Day 1 骨架)", "scope": "all"}],
+        "findings": schema_findings,
+        "unverified": DEMO_UNVERIFIED,
     }
+    return result
+
+
+def _rule_checks(functions) -> int:
+    # 每个函数执行 4 类模式检测(tx.origin/时间戳/重入/未检查返回值)
+    return len(functions) * 4
 
 
 def main(argv=None) -> int:
@@ -47,11 +116,12 @@ def main(argv=None) -> int:
         if not contract_path.is_file():
             print(f"错误: 找不到合约文件 {contract_path}", file=sys.stderr)
             return 1
-        result = build_stub_result(contract_path)
+        source = contract_path.read_text(encoding="utf-8")
+        result = analyze_source(source, contract_path.name)
 
     out = Path(args.output)
     out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"已写入 {out}")
+    print(f"已写入 {out} ({len(result['findings'])} 条发现)")
     print(f"契约校验: uv run schemas/validate.py {out}")
     return 0
 

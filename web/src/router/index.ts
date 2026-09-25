@@ -6,6 +6,7 @@ import HomeView from '@/views/HomeView.vue'
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: HomeView },
+  { path: '/result/:id', name: 'result', component: () => import('@/views/ResultView.vue') },
   { path: '/m1', name: 'M1', component: () => import('@/modules/m1/ProjectSpaceView.vue') },
   { path: '/m2', name: 'M2', component: () => import('@/modules/m2/AuditResultView.vue') },
   { path: '/m3', name: 'M3', component: () => import('@/modules/m3/SpecLibraryView.vue') },
@@ -16,7 +17,9 @@ const routes: RouteRecordRaw[] = [
 
 // 模块元信息供占位页显示(真实实现后删除)
 for (const route of routes.slice(1)) {
-  route.meta = { module: MODULES.find((m) => m.path === route.path) }
+  if (!route.path.startsWith('/result')) {
+    route.meta = { module: MODULES.find((m) => m.path === route.path) }
+  }
 }
 
 const router = createRouter({

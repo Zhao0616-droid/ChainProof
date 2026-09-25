@@ -35,3 +35,13 @@ cd web && npm install && npm run dev
 # 契约自检(三方共用,M8)
 uv run schemas/validate.py examples/path_summary.json examples/analysis_result.json result.json
 ```
+
+## Docker 一键部署(演示版)
+
+```bash
+cd deploy/compose
+docker compose up -d --build
+# 访问 http://localhost:8080(nginx 代理 /api → api:8000,分析记录持久化在 ./data)
+```
+
+镜像说明(demo 单环境布局):`api` 镜像内含 engine/ai/server 三树代码与同一套 Python 依赖(引擎以 `sys.executable` 子进程运行,`ai` 当前纯 stdlib),独立部署后按树拆分。

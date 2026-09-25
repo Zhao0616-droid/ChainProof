@@ -6,5 +6,8 @@ requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.34",
+    "z3-solver>=5.1.0.0",
 ]
+# demo 说明:z3-solver 供引擎子进程使用(引擎在本机/镜像内以 sys.executable 运行);
+# 引擎独立部署后可从 server 移除。真实队列化见 A13/W2。
 # 后续依赖逐项加(uv add):sqlalchemy/数据库驱动, 队列(如 arq), 限流, auth 等

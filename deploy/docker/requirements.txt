@@ -1,0 +1,6 @@
+# demo 单环境布局的运行时依赖并集:引擎以 sys.executable 子进程运行,
+# engine/ai/server 三树共用镜像内同一 Python 环境(ai 当前纯 stdlib)。
+# 独立部署后按树拆分(server/pyproject.toml 注释所述)。
+fastapi>=0.115
+uvicorn[standard]>=0.34
+z3-solver>=5.1.0.0

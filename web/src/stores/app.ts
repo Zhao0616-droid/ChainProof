@@ -1,13 +1,14 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-export const useAppStore = defineStore('app', () => {
-  const analysisResult = ref<unknown>(null)
+import type { AnalysisDetail } from '@/types'
 
-  async function loadMockResult() {
-    const res = await fetch('/api/v1/mock/analysis_result')
-    analysisResult.value = await res.json()
+export const useAppStore = defineStore('app', () => {
+  const current = ref<AnalysisDetail | null>(null)
+
+  function setCurrent(detail: AnalysisDetail | null) {
+    current.value = detail
   }
 
-  return { analysisResult, loadMockResult }
+  return { current, setCurrent }
 })
